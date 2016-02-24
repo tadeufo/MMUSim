@@ -5,6 +5,7 @@
  */
 package mmusim;
 
+import java.awt.event.ItemEvent;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -21,14 +22,19 @@ import java.util.logging.Logger;
  * @author tadeu
  */
 public class MMUSimGUI extends javax.swing.JFrame {
-    public char[] vetorMemoria = new char[50];
+    private static final int MAX_MEM = 50;
+    /**
+     *Vetor que simula a memoria principal do sistema
+     */
+    public char[] vetorMemoria = new char[MAX_MEM];
     private static final String ARQUIVO = "processos.txt";
-    private final static Charset ENCODING = StandardCharsets.UTF_8;    
-    
+    private static final  Charset ENCODING = StandardCharsets.UTF_8;    
+    private Processo[] processos;
     /**
      * Creates new form MMUSimGUI
      */
     public MMUSimGUI() {
+        processos = new Processo[5];
         initComponents();
     }
 
@@ -47,9 +53,9 @@ public class MMUSimGUI extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jCBProcesso = new javax.swing.JComboBox<>();
-        jLabel5 = new javax.swing.JLabel();
+        jLblRegBase = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
+        jLblRegLimite = new javax.swing.JLabel();
         jTxtEndereco = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -154,22 +160,22 @@ public class MMUSimGUI extends javax.swing.JFrame {
         jButton1.setText("Gravar");
 
         jCBProcesso.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Processo A", "Processo B", "Processo C", "Processo D", "Processo E" }));
-        jCBProcesso.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCBProcessoActionPerformed(evt);
+        jCBProcesso.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jCBProcessoItemStateChanged(evt);
             }
         });
 
-        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel5.setText("0");
-        jLabel5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jLblRegBase.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLblRegBase.setText("0");
+        jLblRegBase.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jLabel1.setLabelFor(jTxtEndereco);
         jLabel1.setText("Endereço:");
 
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel6.setText("12");
-        jLabel6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jLblRegLimite.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLblRegLimite.setText("12");
+        jLblRegLimite.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jTxtEndereco.setText("0");
 
@@ -208,8 +214,8 @@ public class MMUSimGUI extends javax.swing.JFrame {
                             .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(12, 12, 12)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLblRegBase, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLblRegLimite, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jButton1, javax.swing.GroupLayout.Alignment.LEADING))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -221,12 +227,12 @@ public class MMUSimGUI extends javax.swing.JFrame {
                     .addComponent(jCBProcesso, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
+                            .addComponent(jLblRegBase)
                             .addComponent(jLabel3))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel4)
-                            .addComponent(jLabel6))))
+                            .addComponent(jLblRegLimite))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -360,10 +366,6 @@ public class MMUSimGUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jCBProcessoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCBProcessoActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jCBProcessoActionPerformed
-
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         //inicializando a tabela        
         for (int i = 0; i < jTable1.getModel().getRowCount(); i++) {
@@ -383,8 +385,29 @@ public class MMUSimGUI extends javax.swing.JFrame {
         } catch (IOException exe) {
             Logger.getLogger(MMUSimGUI.class.getName()).log(Level.SEVERE, null, exe);
         }
-        
+        int i = 0;
+        int enderecoAtual = 0;
+        int limite;
+        for(String a : texto){
+            limite = enderecoAtual + Integer.parseInt(a);
+            processos[i] = new Processo(enderecoAtual, limite);
+            enderecoAtual = limite + 1;
+            i++;
+        }
+        jCBProcesso.removeAllItems();
+        //Insere a lista de processos no combobox
+        for(int j=0; j < i; j++){
+            jCBProcesso.addItem("Processo "+(char)(j+65));
+        }
     }//GEN-LAST:event_jButtonCarregarMouseClicked
+
+    private void jCBProcessoItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCBProcessoItemStateChanged
+        if( evt.getStateChange() == ItemEvent.SELECTED ) {
+            int i = jCBProcesso.getSelectedIndex();
+            jLblRegBase.setText(Integer.toString(processos[i].getEnderecoBase()));
+            jLblRegLimite.setText(Integer.toString(processos[i].getEnderecoLimite()));        
+        }
+    }//GEN-LAST:event_jCBProcessoItemStateChanged
 
     /**
      * @param args the command line arguments
@@ -429,10 +452,10 @@ public class MMUSimGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLblRegBase;
+    private javax.swing.JLabel jLblRegLimite;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
