@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -28,13 +29,14 @@ public class MMUSimGUI extends javax.swing.JFrame {
      */
     public char[] vetorMemoria = new char[MAX_MEM];
     private static final String ARQUIVO = "processos.txt";
+    private static final int MAX_PROCESSOS = 5;
     private static final  Charset ENCODING = StandardCharsets.UTF_8;    
     private Processo[] processos;
     /**
      * Creates new form MMUSimGUI
      */
     public MMUSimGUI() {
-        processos = new Processo[5];
+        processos = new Processo[MAX_PROCESSOS];
         initComponents();
     }
 
@@ -159,7 +161,7 @@ public class MMUSimGUI extends javax.swing.JFrame {
 
         jButton1.setText("Gravar");
 
-        jCBProcesso.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Processo A", "Processo B", "Processo C", "Processo D", "Processo E" }));
+        jCBProcesso.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Processos..." }));
         jCBProcesso.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jCBProcessoItemStateChanged(evt);
@@ -368,14 +370,20 @@ public class MMUSimGUI extends javax.swing.JFrame {
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         //inicializando a tabela        
-        for (int i = 0; i < jTable1.getModel().getRowCount(); i++) {
-            vetorMemoria[i] = ' ';
+        for (int i = 0; i < MAX_MEM; i++) {
+            vetorMemoria[i] = ' ';            
+        }
+        atualizaTabela();
+    }//GEN-LAST:event_formWindowOpened
+    /**
+     * Atualiza a jTable de memoria RAM com os dados contidos no vetorMemoria
+     */
+    private void atualizaTabela(){
+        for (int i = 0; i < MAX_MEM; i++) {            
             jTable1.setValueAt(i, i, 0);
             jTable1.setValueAt(vetorMemoria[i], i, 1);
-        }
-        jTable1.setValueAt('X', 0, 1);
-    }//GEN-LAST:event_formWindowOpened
-
+        }        
+    }
     private void jButtonCarregarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonCarregarMouseClicked
         Path path = Paths.get(ARQUIVO);
         //carrega o conteudo de ARQUIVO em um ArrayList
@@ -387,12 +395,19 @@ public class MMUSimGUI extends javax.swing.JFrame {
         }
         int i = 0;
         int enderecoAtual = 0;
-        int limite;
-        for(String a : texto){
-            limite = enderecoAtual + Integer.parseInt(a);
-            processos[i] = new Processo(enderecoAtual, limite);
-            enderecoAtual = limite + 1;
-            i++;
+        int limite=0;
+                
+        while(i < texto.size() && i < MAX_PROCESSOS && limite <= MAX_MEM){
+            limite = enderecoAtual + Integer.parseInt(texto.get(i))-1;
+            if (limite <= MAX_MEM){
+                processos[i] = new Processo(enderecoAtual, limite);
+                enderecoAtual = limite + 1;
+                i++;
+            }else{
+                String msg = "Limite de memória alcançado no processo: "+(char)(i+65);
+                System.out.print(msg);
+                JOptionPane.showMessageDialog(this, msg, "Limite", JOptionPane.WARNING_MESSAGE);
+            }
         }
         jCBProcesso.removeAllItems();
         //Insere a lista de processos no combobox
