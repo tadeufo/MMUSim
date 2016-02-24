@@ -160,6 +160,11 @@ public class MMUSimGUI extends javax.swing.JFrame {
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         jButton1.setText("Gravar");
+        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton1MouseClicked(evt);
+            }
+        });
 
         jCBProcesso.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Processos..." }));
         jCBProcesso.addItemListener(new java.awt.event.ItemListener() {
@@ -373,12 +378,12 @@ public class MMUSimGUI extends javax.swing.JFrame {
         for (int i = 0; i < MAX_MEM; i++) {
             vetorMemoria[i] = ' ';            
         }
-        atualizaTabela();
+        atualizaTabelaRAM();
     }//GEN-LAST:event_formWindowOpened
     /**
      * Atualiza a jTable de memoria RAM com os dados contidos no vetorMemoria
      */
-    private void atualizaTabela(){
+    private void atualizaTabelaRAM(){
         for (int i = 0; i < MAX_MEM; i++) {            
             jTable1.setValueAt(i, i, 0);
             jTable1.setValueAt(vetorMemoria[i], i, 1);
@@ -423,6 +428,29 @@ public class MMUSimGUI extends javax.swing.JFrame {
             jLblRegLimite.setText(Integer.toString(processos[i].getEnderecoLimite()));        
         }
     }//GEN-LAST:event_jCBProcessoItemStateChanged
+
+    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+        
+        int enderecoLogico = Integer.decode(jTxtEndereco.getText());
+        
+        int processoSelecionado = jCBProcesso.getSelectedIndex();
+        int registradorBase = processos[processoSelecionado].getEnderecoBase();
+        int registradorLimite = processos[processoSelecionado].getEnderecoLimite();
+        
+        //calcular o endereço físico
+        int enderecoFisico = enderecoLogico + registradorBase;
+        
+        //Verfificar se o endereço está dentro da área permitida
+        if (enderecoFisico < registradorLimite){
+            vetorMemoria[enderecoFisico] = jTxtValor.getText().charAt(0);
+            atualizaTabelaRAM();
+        }else{//Se o processo tentar gravar fora da sua área permitida
+            String msg = "O Processo "+(char)(processoSelecionado+65)+
+                    " executou uma operacao ilegal("+enderecoFisico+")";
+            System.out.print(msg);
+            JOptionPane.showMessageDialog(this, msg, "Limite", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButton1MouseClicked
 
     /**
      * @param args the command line arguments
